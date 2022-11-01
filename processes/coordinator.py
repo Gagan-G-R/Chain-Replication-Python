@@ -3,8 +3,8 @@ import logging
 import argparse
 from concurrent import futures
 import grpc
-
 from generated import spec_pb2, spec_pb2_grpc
+
 
 
 class Coordinator(spec_pb2_grpc.Coordinator):
@@ -21,17 +21,26 @@ class Coordinator(spec_pb2_grpc.Coordinator):
         channel = grpc.insecure_channel(f'localhost:{request.port}')
         self.clients.append((request.port, spec_pb2_grpc.NodeStub(channel)))
 
-        print("Node Added")
+        print("New Node Added at Port : ", request.port)
         return reply
 
     def Write(self, request: spec_pb2.WriteRequest, context) -> spec_pb2.WriteReply:
-        while self.clients:
-            res = self.clients[0][1].Write(request)
-            if res.success:
-                return res
-            else:
-                self.clients = self.clients[1:]
-        return spec_pb2.WriteReply(success=False)
+
+        unreachableClients = []
+        for client in self.clients:
+            try:
+                res = client[1].Write(request)
+
+            except Exception as e:
+                # update the Log file
+                print("Node was unreadchable : ", client[0])
+                print(client[0], "is removed")
+                unreachableClients.append(client)
+
+        for client in unreachableClients:
+            self.clients.remove(client)
+
+        return spec_pb2.WriteReply(success=True)
 
 
 def serve(args):
@@ -39,7 +48,7 @@ def serve(args):
     spec_pb2_grpc.add_CoordinatorServicer_to_server(Coordinator(), server)
     server.add_insecure_port(f'[::]:{args.port}')
     server.start()
-    print("Co-Ordinator is running")
+    print("Co-Ordinator Started at port :", args.port)
     server.wait_for_termination()
 
 

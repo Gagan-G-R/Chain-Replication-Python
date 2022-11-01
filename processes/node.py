@@ -3,8 +3,13 @@ import argparse
 from concurrent import futures
 import grpc
 import dbm
-
 from generated import spec_pb2, spec_pb2_grpc
+
+# Mongo
+from pymongo import MongoClient
+CONNECTION_STRING = "mongodb://localhost:27017/CRAQ"
+client = MongoClient(CONNECTION_STRING)
+db = client['CRAQ']
 
 
 class Node(spec_pb2_grpc.Node):
@@ -20,16 +25,27 @@ class Node(spec_pb2_grpc.Node):
             spec_pb2.RegisterRequest(port=int(args.port)))
 
     def Read(self, request: spec_pb2.ReadRequest, context) -> spec_pb2.ReadReply:
-        with dbm.open(f'.{self.args.port}-dbm', 'r') as store:
-            val = store.get(request.key, bytearray()).decode('utf8')
-        return spec_pb2.ReadReply(key=request.key, value=val)
+        # with dbm.open(f'.{self.args.port}-dbm', 'r') as store:
+        #     val = store.get(request.key, bytearray()).decode('utf8')
+        Mongo_val = db[str(self.args.port)].find_one({"_id": request.key})
+        print("Mongo Value:", Mongo_val)
+        return spec_pb2.ReadReply(key=request.key, value=Mongo_val['value'])
 
     def Write(self, request: spec_pb2.WriteRequest, context) -> spec_pb2.WriteReply:
         try:
-            with dbm.open(f'.{self.args.port}-dbm', 'c') as store:
-                store[request.key] = request.value
+            # with dbm.open(f'.{self.args.port}-dbm', 'c') as store:
+            #     store[request.key] = request.value
+
+            query = {"_id": request.key}
+            val = {"$set": {"value": request.value}}
+            db[str(self.args.port)].find_one_and_update(
+                query, val, upsert=True)
+
+            print("Data Added successfully:(", request.key, ",", request.value, ")")
             return spec_pb2.WriteReply(success=True)
+
         except Exception:
+            print("Failed to add Data : (", request.key, ",", request.value, ")")
             return spec_pb2.WriteReply(success=False)
 
 
@@ -38,6 +54,8 @@ def serve(args):
     spec_pb2_grpc.add_NodeServicer_to_server(Node(args), server)
     server.add_insecure_port(f'[::]:{int(args.port)}')
     server.start()
+    print("Listening at port : ", int(args.port))
+    print("Node connected to Co-Ordinator at port :", int(args.coordinator))
     print("Node Started...")
     server.wait_for_termination()
 
