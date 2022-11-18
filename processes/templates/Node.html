@@ -5,49 +5,80 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <script src="https://cdn.tailwindcss.com"></script>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CRAQ - CHAIN - {{coo_no}}</title>
+    <title>CRAQ - NODE - {{node_id}}</title>
 </head>
 <body>
     <div  class="m-20">
-        <div class="shadow py-8 px-10">
-    <div class="w-72 h-full ">
+        <div class="shadow pb-8 px-10">
+            <h1 class="text-center mx-auto py-2 px-2 font-bold text-2xl">Node {{ node_id }} </h2>
+                <div class="flex space-x-6 justify-evenly bg-gray-200">
+    <form method="GET" action="/readwrite" class="mr-10 mt-10">
         <div class=" flex border border-gray-300 text-gray-800 bg-white shadow-lg">
-            <select class="appearance-none w-full py-1 px-2 bg-white" name="whatever" id="frm-whatever">    
+            <select class="appearance-none w-full py-1 px-2 bg-white" name="searchT" id="frm-whatever">    
                 <option value="w">Write</option>
                 <option value="r">Read</option>
-              
-            </select>
             
-               
+            </select>
+        </div>
+        <div class="flex flex-col my-10">
+            <div>
+            <label for="Key" class="px-2">Key : </label>
+            <input class="border-2 w-72" type="text" name="Key" id="Key" />
+            </div>
+            <div class="mt-2" ref="value-key-input">
+                <label for="Value">Value :</label>
+                <input class="border-2 w-72" type="text" name="Value" id="Value" />
+        </div>
+        <input class='hidden' name="node_id" value='{{ node_id }}' />
+        <input class='hidden' name="coo_id" value='{{ coo_no }}' />
+        <button type="submit"  class="w-1/2 mx-auto mt-6 bg-[#0d5798] hover:bg-white hover:text-[#0d5798] hover:border hover:border-[#0d5798] text-white font-bold py-2 px-4 rounded" onclick="alert('submit')">
+            Submit
+          </button>
+        </div>
+    </form>
+    <div>
+        <div class="px-10 py-14">
+            {% if respView!=[] %}
+            <h1 class="text-xl font-bold">Response</h1>
+            <div class="p-10 shadow mt-6 bg-white">
+                <h1>key : {{ respView['key'] }}</h1>
+                <h1>val : {{ respView['value'] }}</h1>
+            </div>
+            {% endif %}
         </div>
     </div>
-    <div class="flex flex-col my-10">
-        <div>
-        <label for="Key" class="px-2">Key : </label>
-        <input class="border-2 w-72" type="text" name="Key" id="Key" />
-        </div>
-        <div class="mt-2" ref="value-key-input">
-            <label for="Value">Value :</label>
-            <input class="border-2 w-72" type="text" name="Value" id="Value" />
-        </div>
 </div>
-<div>
-    <button class="bg-[#0d5798] hover:bg-white hover:text-[#0d5798] hover:border hover:border-[#0d5798] text-white font-bold py-2 px-4 rounded" onclick="alert('submit')">
-        Submit
-      </button>
 </div>
 </div>
 
-<div class="my-10 border-2 border-gray-300 shadow h-80">
-    <h1 class="text-center mx-auto py-2 px-2 font-bold text-2xl">Node {{ node_id }} Database</h2>
+<div class="my-10 border-2 border-gray-300 shadow h-80 px-10 mx-20">
+    <h1 class="text-center mx-auto py-2 px-2 font-bold text-2xl">Node {{ node_id }} Database</h1>
+        <div  class=" my-10 py-4 border px-2 text-center bg-gray-200">
+            <ul class="flex space-x-2 justify-evenly">
+            {% for val in node_data %}
+                <li>
+                    <div class="p-10 shadow mt-6 bg-white">
+                        <h1>key : {{val['_id']}}</h1>
+                        <h1>val : {{val['value']}}</h1>
+                    </div>
+                </li>
+            {% endfor %}
+            </ul>
+        </div>
 </div>
 </div>  
 </body>
 <script>
     const js=007;
     const select = document.getElementById('frm-whatever');
+
+    async function readreq(){
+
+    }
+
     select.addEventListener('change', (event) => {
         console.log(event.target.value);
+        
     });
 
     const valueKeyInput = document.querySelector('[ref="value-key-input"]');

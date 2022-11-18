@@ -5,24 +5,29 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <script src="https://cdn.tailwindcss.com"></script>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>CRAQ - COORD - {{coo_no}}</title>
 </head>
 <body>
+    <h1 class="mx-auto my-8 px-4 text-4xl text-center pt-10">COORDINATOR</h1>
+
     <div class="mx-8 my-10 px-4">
         <ul class="flex flex-row justify-evenly">
-        
-            {% for s in nodeslist %}
-            
-            
-            <div  class="w-48 my-10 py-4 border px-2 text-center ">
-                <li class="font-bold">Node : {{s['id']}}</li>
-                <h1 class="font-medium text-base">Key : {{s['key']}}</h1>
-                <h1>Value : {{s['value']}}</h1>
-                <h1>Status : {{s['status']}}</h1>
+            {% for node in nodeslist %}
+            <div  class="w-48 my-10 py-4 border px-2 text-center bg-gray-200">
+                <li class="font-bold">Node : {{node}}</li>
+                <ul>
+                {% for val in nodeslist[node] %}
+                    <li>
+                        <div class="p-10 shadow mt-6 bg-white">
+                            <h1>key : {{val['_id']}}</h1>
+                            <h1>val : {{val['value']}}</h1>
+                        </div>
+                    </li>
+                {% endfor %}
+                </ul>
             </div>
-        
             {% endfor %}
-          </ul>
+        </ul>
     </div>
 </body>
 </html>

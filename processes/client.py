@@ -6,6 +6,8 @@ class Client():
 
     def __init__(self, args):
 
+        self.coo_id = args["coordinator"]
+        self.node_id = args["read"]
         read_channel = grpc.insecure_channel(f'localhost:{args["read"]}')
         self.read_stub = spec_pb2_grpc.NodeStub(read_channel)
 
@@ -27,3 +29,9 @@ class Client():
         print(
             f'Update was {"successful" if reply.success else "unsuccessful"}')
         return True if reply.success else False
+
+    def get_coo(self):
+        return self.coo_id
+
+    def get_node(self):
+        return self.node_id
