@@ -35,6 +35,7 @@ class Coordinator(spec_pb2_grpc.Coordinator):
                 # update the Log file
                 print("Node was unreadchable : ", client[0])
                 print(client[0], "is removed")
+                
                 unreachableClients.append(client)
 
         for client in unreachableClients:
